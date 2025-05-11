@@ -1,27 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>ChatGPT Chatbot</title>
+    <meta charset="UTF-8">
+    <title>Blue ChatGPT Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4fb;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background-color: #1e4db7;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        #chat-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+
+        .user {
+            align-self: flex-end;
+            background-color: #1e4db7;
+            color: white;
+        }
+
+        .bot {
+            align-self: flex-start;
+            background-color: #e2e9f9;
+            color: #333;
+        }
+
+        #input-area {
+            display: flex;
+            padding: 1rem;
+            background-color: white;
+            border-top: 1px solid #ccc;
+        }
+
+        #message {
+            flex: 1;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-right: 0.5rem;
+        }
+
+        #send-btn {
+            background-color: #1e4db7;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.2rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #send-btn:hover {
+            background-color: #163a91;
+        }
+    </style>
+</head>
+<body>
+    <header>💬 ChatGPT Chatbot</header>
+
+    <div id="chat-container"></div>
+
+    <div id="input-area">
+        <input type="text" id="message" placeholder="Type your message..." onkeydown="if(event.key==='Enter') sendMessage()" />
+        <button id="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+
     <script>
         async function sendMessage() {
-            const userInput = document.getElementById("message").value;
-            const responseBox = document.getElementById("response");
+            const input = document.getElementById("message");
+            const chat = document.getElementById("chat-container");
+            const msg = input.value.trim();
+            if (!msg) return;
 
+            // Display user's message
+            const userMsg = document.createElement("div");
+            userMsg.className = "message user";
+            userMsg.innerText = msg;
+            chat.appendChild(userMsg);
+            chat.scrollTop = chat.scrollHeight;
+
+            input.value = "";
+
+            // Send to backend
             const res = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: userInput })
+                body: JSON.stringify({ message: msg })
             });
 
             const data = await res.json();
-            responseBox.innerText = data.reply;
+
+            const botMsg = document.createElement("div");
+            botMsg.className = "message bot";
+            botMsg.innerText = data.reply || data.error || "Oops! Something went wrong.";
+            chat.appendChild(botMsg);
+            chat.scrollTop = chat.scrollHeight;
         }
     </script>
-</head>
-<body>
-    <h2>Chat with ChatGPT</h2>
-    <input type="text" id="message" placeholder="Type your message" />
-    <button onclick="sendMessage()">Send</button>
-    <p><strong>Response:</strong> <span id="response"></span></p>
 </body>
 </html>
